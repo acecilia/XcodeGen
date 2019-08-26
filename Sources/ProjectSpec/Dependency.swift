@@ -35,7 +35,7 @@ public struct Dependency: Equatable {
 
     public enum DependencyType: Equatable {
         case target
-        case framework
+        case framework(projectPath: String?)
         case carthage(findFrameworks: Bool?)
         case sdk(root: String?)
     }
@@ -54,7 +54,8 @@ extension Dependency: JSONObjectConvertible {
             type = .target
             reference = target
         } else if let framework: String = jsonDictionary.json(atKeyPath: "framework") {
-            type = .framework
+            let projectPath: String? = jsonDictionary.json(atKeyPath: "projectPath")
+            type = .framework(projectPath: projectPath)
             reference = framework
         } else if let carthage: String = jsonDictionary.json(atKeyPath: "carthage") {
             let findFrameworks: Bool? = jsonDictionary.json(atKeyPath: "findFrameworks")

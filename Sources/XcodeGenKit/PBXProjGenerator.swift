@@ -20,6 +20,7 @@ public class PBXProjGenerator {
 
     var carthageFrameworksByPlatform: [String: Set<PBXFileElement>] = [:]
     var frameworkFiles: [PBXFileElement] = []
+    var projectFiles: [PBXFileElement] = []
 
     var generated = false
 
@@ -182,6 +183,17 @@ public class PBXProjGenerator {
                 )
             )
             frameworkFiles.append(carthageGroup)
+        }
+
+        if !projectFiles.isEmpty {
+            let group = addObject(
+                PBXGroup(
+                    children: projectFiles,
+                    sourceTree: .group,
+                    name: "Projects"
+                )
+            )
+            frameworkFiles.append(group)
         }
 
         if !frameworkFiles.isEmpty {
@@ -500,7 +512,7 @@ public class PBXProjGenerator {
                     }
                 }
 
-            case .framework:
+            case .framework(let projectPath):
                 let buildPath = Path(dependency.reference).parent().string.quoted
                 frameworkBuildPaths.insert(buildPath)
 
@@ -531,6 +543,17 @@ public class PBXProjGenerator {
 
                 if !frameworkFiles.contains(fileReference) {
                     frameworkFiles.append(fileReference)
+                }
+
+                if let projectPath = projectPath {
+                    let projectReference = sourceGenerator.getFileReference(
+                        path: Path(projectPath),
+                        inPath: project.basePath
+                    )
+
+                    if !projectFiles.contains(projectReference) {
+                        projectFiles.append(projectReference)
+                    }
                 }
 
                 if embed {
